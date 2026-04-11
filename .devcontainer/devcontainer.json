@@ -1,0 +1,16 @@
+{
+    "name": "Rust for SQLite",
+    "image": "mcr.microsoft.com/devcontainers/rust:1-bullseye",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "GitHub.copilot",
+                "rust-lang.rust-analyzer",
+                "vadimcn.vscode-lldb",
+                "serayuzgur.crates",
+                "tamasfe.even-better-toml"
+            ]
+        }
+    },
+    "postCreateCommand": "cargo build --workspace"
+}

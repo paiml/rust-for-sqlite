@@ -1,0 +1,14 @@
+[workspace]
+members = [
+    "examples/1-sqlite-intro",
+    "examples/2-core-sql",
+    "examples/3-error-handling",
+    "examples/4-csv-ingestion",
+    "examples/5-json",
+    "examples/6-db-dump",
+    "examples/7-cli-architecture",
+    "examples/8-filesystem-crawl",
+    "examples/9-query-export",
+    "fscrawl",
+]
+resolver = "2"

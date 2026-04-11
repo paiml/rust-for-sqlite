@@ -1,0 +1,8 @@
+[package]
+name = "cli-architecture"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rusqlite = "0.31"
+clap = { version = "4", features = ["derive", "env"] }
