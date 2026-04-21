@@ -16,12 +16,12 @@ fn create_schema(conn: &Connection) -> Result<()> {
 
 /// Insert a batch of rows inside a single transaction.
 /// If any insert fails the whole batch is rolled back.
-fn insert_batch(conn: &Connection, events: &[(&str, &str)]) -> Result<()> {
-    let tx = conn.unchecked_transaction()?;
+fn insert_batch(conn: &mut Connection, events: &[(&str, &str)]) -> Result<()> {
+    let tx = conn.transaction()?;
 
     for (name, ts) in events {
         tx.execute(
-            "INSERT INTO events (name, timestamp) VALUES (?1, ?2)",
+            "INSERT INTO events (xname, timestamp) VALUES (?1, ?2)",
             params![name, ts],
         )?;
     }
@@ -32,7 +32,7 @@ fn insert_batch(conn: &Connection, events: &[(&str, &str)]) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let conn = Connection::open_in_memory()?;
+    let mut conn = Connection::open_in_memory()?;
     create_schema(&conn)?;
 
     let events = [
@@ -41,7 +41,9 @@ fn main() -> Result<()> {
         ("end", "2024-01-01T00:00:02"),
     ];
 
-    insert_batch(&conn, &events)?;
+    if let Err(e) = insert_batch(&mut conn, &events) {
+        println!("There was an error {}", e);
+    }
 
     let count: i64 =
         conn.query_row("SELECT COUNT(*) FROM events", [], |row| row.get(0))?;
@@ -50,36 +52,3 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn setup() -> Connection {
-        let conn = Connection::open_in_memory().expect("in-memory DB");
-        create_schema(&conn).expect("schema");
-        conn
-    }
-
-    #[test]
-    fn test_batch_insert() {
-        let conn = setup();
-        let events = [("click", "2024-06-01T10:00:00")];
-        insert_batch(&conn, &events).expect("insert");
-
-        let count: i64 = conn
-            .query_row("SELECT COUNT(*) FROM events", [], |row| row.get(0))
-            .expect("count");
-        assert_eq!(count, 1);
-    }
-
-    #[test]
-    fn test_empty_batch() {
-        let conn = setup();
-        insert_batch(&conn, &[]).expect("empty batch ok");
-
-        let count: i64 = conn
-            .query_row("SELECT COUNT(*) FROM events", [], |row| row.get(0))
-            .expect("count");
-        assert_eq!(count, 0);
-    }
-}

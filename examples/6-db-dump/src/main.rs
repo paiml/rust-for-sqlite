@@ -64,7 +64,8 @@ fn dump_database(conn: &Connection) -> Result<String> {
 }
 
 fn main() -> Result<()> {
-    let conn = Connection::open_in_memory()?;
+    //let conn = Connection::open_in_memory()?;
+    let conn = Connection::open("database.db")?;
 
     conn.execute_batch(
         "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT);",
@@ -84,3 +85,39 @@ fn main() -> Result<()> {
 
     Ok(())
 }
+
+// NOTE: rusqlite has no built-in SQL dump. The manual approach above is educational
+// but fragile — BLOBs, special characters, and quoting edge cases can break it.
+//
+// For production use, prefer SQLite's backup API (binary copy of the database file),
+// which rusqlite exposes via the "backup" Cargo feature:
+//
+//   [dependencies]
+//   rusqlite = { version = "...", features = ["backup"] }
+//
+// The backup API is atomic, works on live databases, and is what the `sqlite3` CLI
+// uses internally for `.backup` and `.clone`.
+//
+// Uncomment the function below to see how to write a SQL dump to a real file.
+
+// fn main() -> Result<()> {
+//     use std::fs;
+//
+//     // Open (or create) a real on-disk database instead of in-memory
+//     let conn = Connection::open("demo.db")?;
+//
+//     conn.execute_batch(
+//         "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT);",
+//     )?;
+//     conn.execute("INSERT INTO users (name, email) VALUES (?1, ?2)", params!["Alice", "alice@example.com"])?;
+//     conn.execute("INSERT INTO users (name, email) VALUES (?1, ?2)", params!["Bob", "bob@example.com"])?;
+//
+//     let dump = dump_database(&conn)?;
+//
+//     // Write the SQL dump to a file
+//     fs::write("demo_dump.sql", &dump).expect("failed to write dump file");
+//     println!("Dump written to demo_dump.sql");
+//     println!("{dump}");
+//
+//     Ok(())
+// }

@@ -4,6 +4,7 @@ members = [
     "examples/2-core-sql",
     "examples/3-error-handling",
     "examples/4-csv-ingestion",
+    "examples/4-csv-serde",
     "examples/5-json",
     "examples/6-db-dump",
     "examples/7-cli-architecture",

@@ -4,6 +4,11 @@
 use rusqlite::{Connection, Result, params};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::fs;
+
+fn default_unit() -> String {
+    "celsius".to_string()
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Sensor {
@@ -11,10 +16,17 @@ struct Sensor {
     temperature: f64,
     humidity: Option<f64>,
     timestamp: String,
+    // missing key → empty string ""
+    #[serde(default)]
+    location: String,
+    // missing key → "celsius" via function
+    #[serde(default = "default_unit")]
+    unit: String,
 }
 
 fn main() -> Result<()> {
-    let conn = Connection::open_in_memory()?;
+    //let conn = Connection::open_in_memory()?;
+    let conn = Connection::open("sensors.db")?;
 
     conn.execute_batch(
         "CREATE TABLE sensor_readings (
@@ -27,15 +39,12 @@ fn main() -> Result<()> {
         );",
     )?;
 
-    // Deserialize JSON into typed structs
-    let json_input = r#"[
-        {"device_id": "A1", "temperature": 22.5, "humidity": 60.1, "timestamp": "2024-06-01T10:00:00"},
-        {"device_id": "B2", "temperature": 19.0, "timestamp": "2024-06-01T10:01:00"},
-        {"device_id": "A1", "temperature": 23.1, "humidity": 58.4, "timestamp": "2024-06-01T10:02:00"}
-    ]"#;
+    let path = std::env::args().nth(1).unwrap_or_else(|| "sensors.json".to_string());
+    let json_input = fs::read_to_string(&path)
+        .unwrap_or_else(|e| panic!("cannot read {path}: {e}"));
 
     let readings: Vec<Sensor> =
-        serde_json::from_str(json_input).expect("valid JSON");
+        serde_json::from_str(&json_input).expect("valid JSON");
 
     let tx = conn.unchecked_transaction()?;
     for r in &readings {

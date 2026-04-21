@@ -4,6 +4,7 @@
 use rusqlite::{Connection, Result, params};
 
 #[derive(Debug)]
+#[allow(dead_code)]
 struct Record {
     id: i64,
     name: String,
@@ -19,19 +20,25 @@ fn main() -> Result<()> {
             id    INTEGER PRIMARY KEY,
             name  TEXT    NOT NULL,
             value REAL    NOT NULL
+        );
+        CREATE TABLE example (
+            id    INTEGER PRIMARY KEY,
+            name  TEXT    NOT NULL,
+            value REAL    NOT NULL
         );",
+
     )?;
     println!("Table created.");
 
     // INSERT with parameterized queries — prevents SQL injection
-    conn.execute(
-        "INSERT INTO records (name, value) VALUES (?1, ?2)",
-        params!["alpha", 1.5],
+    conn.execute_batch(
+        "INSERT INTO records (name, value) VALUES (\"alpha\", 1.5);",
     )?;
     conn.execute(
         "INSERT INTO records (name, value) VALUES (?1, ?2)",
         params!["beta", 2.7],
     )?;
+
     println!("Rows inserted.");
 
     // SELECT

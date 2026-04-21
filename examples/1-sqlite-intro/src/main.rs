@@ -5,7 +5,10 @@ use rusqlite::{Connection, Result};
 
 fn main() -> Result<()> {
     // Open (or create) a database file on disk
-    let conn = Connection::open("lesson1.db")?;
+    //let conn = Connection::open("lesson1.db")?;
+
+    let conn = Connection::open_in_memory()?;
+
     println!("Opened database successfully.");
 
     // SQLite stores the schema version in a pragma — a quick sanity check
