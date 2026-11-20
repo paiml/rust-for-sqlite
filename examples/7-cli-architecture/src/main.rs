@@ -2,7 +2,7 @@
 // Demonstrates: multi-subcommand CLI with clap derive API, DB path resolution.
 
 use clap::{Parser, Subcommand};
-use rusqlite::{Connection, Result, params};
+use rusqlite::{params, Connection, Result};
 use std::path::PathBuf;
 
 #[derive(Parser)]
