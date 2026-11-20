@@ -31,13 +31,13 @@ In a new Cargo project, add `rusqlite` to `Cargo.toml`:
 
 ```toml
 [dependencies]
-rusqlite = "0.31"
+rusqlite = { version = "0.43", features = ["bundled"] }
 ```
 
 For a self-contained binary that bundles SQLite (no system library required):
 
 ```toml
-rusqlite = { version = "0.31", features = ["bundled"] }
+rusqlite = { version = "0.43", features = ["bundled"] }
 ```
 
 ### Exercise 2: Open a Connection
