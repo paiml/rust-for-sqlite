@@ -1,7 +1,7 @@
 // Lesson 2.2 — Loading and exporting JSON
 // Demonstrates: serde_json deserialization, inserting records, exporting to JSON.
 
-use rusqlite::{Connection, Result, params};
+use rusqlite::{params, Connection, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fs;
@@ -39,12 +39,13 @@ fn main() -> Result<()> {
         );",
     )?;
 
-    let path = std::env::args().nth(1).unwrap_or_else(|| "sensors.json".to_string());
-    let json_input = fs::read_to_string(&path)
-        .unwrap_or_else(|e| panic!("cannot read {path}: {e}"));
+    let path = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| "sensors.json".to_string());
+    let json_input =
+        fs::read_to_string(&path).unwrap_or_else(|e| panic!("cannot read {path}: {e}"));
 
-    let readings: Vec<Sensor> =
-        serde_json::from_str(&json_input).expect("valid JSON");
+    let readings: Vec<Sensor> = serde_json::from_str(&json_input).expect("valid JSON");
 
     let tx = conn.unchecked_transaction()?;
     for r in &readings {

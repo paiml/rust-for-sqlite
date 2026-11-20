@@ -2,7 +2,7 @@
 // Demonstrates: aggregate queries, exporting to CSV and JSON.
 
 use csv::Writer;
-use rusqlite::{Connection, Result, params};
+use rusqlite::{params, Connection, Result};
 use serde_json::json;
 
 fn setup(conn: &Connection) -> Result<()> {
@@ -15,11 +15,11 @@ fn setup(conn: &Connection) -> Result<()> {
         );",
     )?;
     let rows: &[(&str, i64, &str, i64)] = &[
-        ("/data/report.csv",  102_400, "csv",  1_700_000_000),
+        ("/data/report.csv", 102_400, "csv", 1_700_000_000),
         ("/data/archive.zip", 5_242_880, "zip", 1_700_000_001),
-        ("/src/main.rs",       4_096,   "rs",  1_700_000_002),
-        ("/src/lib.rs",        2_048,   "rs",  1_700_000_003),
-        ("/data/notes.txt",      512,   "txt", 1_700_000_004),
+        ("/src/main.rs", 4_096, "rs", 1_700_000_002),
+        ("/src/lib.rs", 2_048, "rs", 1_700_000_003),
+        ("/data/notes.txt", 512, "txt", 1_700_000_004),
     ];
     let tx = conn.unchecked_transaction()?;
     for (path, size, ext, mtime) in rows {
@@ -38,8 +38,7 @@ fn main() -> Result<()> {
 
     // --- Largest files ---
     println!("=== Top 3 Largest Files ===");
-    let mut stmt =
-        conn.prepare("SELECT path, size FROM files ORDER BY size DESC LIMIT 3")?;
+    let mut stmt = conn.prepare("SELECT path, size FROM files ORDER BY size DESC LIMIT 3")?;
     let rows = stmt.query_map([], |row| {
         Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?))
     })?;
@@ -55,7 +54,11 @@ fn main() -> Result<()> {
          FROM files GROUP BY extension ORDER BY SUM(size) DESC",
     )?;
     let rows = stmt.query_map([], |row| {
-        Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?, row.get::<_, i64>(2)?))
+        Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, i64>(1)?,
+            row.get::<_, i64>(2)?,
+        ))
     })?;
     for row in rows {
         let (ext, cnt, total) = row?;
@@ -67,7 +70,8 @@ fn main() -> Result<()> {
     let mut wtr = Writer::from_writer(std::io::stdout());
     wtr.write_record(["path", "size", "extension"]).unwrap();
 
-    let mut stmt = conn.prepare("SELECT path, size, COALESCE(extension,'') FROM files ORDER BY path")?;
+    let mut stmt =
+        conn.prepare("SELECT path, size, COALESCE(extension,'') FROM files ORDER BY path")?;
     let rows = stmt.query_map([], |row| {
         Ok((
             row.get::<_, String>(0)?,

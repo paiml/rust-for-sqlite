@@ -1,7 +1,7 @@
 // Lesson 1.2 — Core SQL operations in Rust
 // Demonstrates: CREATE TABLE, INSERT, SELECT, UPDATE, DELETE with rusqlite.
 
-use rusqlite::{Connection, Result, params};
+use rusqlite::{params, Connection, Result};
 
 #[derive(Debug)]
 #[allow(dead_code)]
@@ -26,14 +26,11 @@ fn main() -> Result<()> {
             name  TEXT    NOT NULL,
             value REAL    NOT NULL
         );",
-
     )?;
     println!("Table created.");
 
     // INSERT with parameterized queries — prevents SQL injection
-    conn.execute_batch(
-        "INSERT INTO records (name, value) VALUES (\"alpha\", 1.5);",
-    )?;
+    conn.execute_batch("INSERT INTO records (name, value) VALUES (\"alpha\", 1.5);")?;
     conn.execute(
         "INSERT INTO records (name, value) VALUES (?1, ?2)",
         params!["beta", 2.7],
@@ -68,8 +65,7 @@ fn main() -> Result<()> {
     println!("Deleted 'beta' row.");
 
     // Final SELECT
-    let count: i64 =
-        conn.query_row("SELECT COUNT(*) FROM records", [], |row| row.get(0))?;
+    let count: i64 = conn.query_row("SELECT COUNT(*) FROM records", [], |row| row.get(0))?;
     println!("\nRemaining rows: {count}");
 
     Ok(())

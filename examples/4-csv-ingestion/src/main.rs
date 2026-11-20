@@ -2,7 +2,7 @@
 // Demonstrates: parsing CSV with the csv crate and bulk-inserting into SQLite.
 
 use csv::ReaderBuilder;
-use rusqlite::{Connection, Result, params};
+use rusqlite::{params, Connection, Result};
 
 fn main() -> Result<()> {
     let conn = Connection::open_in_memory()?;
