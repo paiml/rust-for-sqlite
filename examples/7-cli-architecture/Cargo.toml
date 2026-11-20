@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rusqlite = "0.31"
+rusqlite = { version = "0.43", features = ["bundled"] }
 clap = { version = "4", features = ["derive", "env"] }
