@@ -1,7 +1,7 @@
 // Lesson 1.3 — Error handling and transactions
 // Demonstrates: Result + ?, transactions for batch writes, in-memory test DB.
 
-use rusqlite::{Connection, Result, params};
+use rusqlite::{params, Connection, Result};
 
 fn create_schema(conn: &Connection) -> Result<()> {
     conn.execute_batch(
@@ -45,10 +45,8 @@ fn main() -> Result<()> {
         println!("There was an error {}", e);
     }
 
-    let count: i64 =
-        conn.query_row("SELECT COUNT(*) FROM events", [], |row| row.get(0))?;
+    let count: i64 = conn.query_row("SELECT COUNT(*) FROM events", [], |row| row.get(0))?;
     println!("Total events stored: {count}");
 
     Ok(())
 }
-

@@ -1,12 +1,12 @@
 use csv::ReaderBuilder;
-use rusqlite::{Connection, Result, params};
+use rusqlite::{params, Connection, Result};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 struct Product {
     name: String,
     category: Option<String>,
-    price: Option<f64>,  // Serde automatically handles empty strings as None
+    price: Option<f64>, // Serde automatically handles empty strings as None
 }
 
 fn main() -> Result<()> {

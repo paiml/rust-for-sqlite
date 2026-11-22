@@ -1,10 +1,7 @@
 use csv::Writer;
 use rusqlite::{params, Connection, Result};
 use serde_json::json;
-use std::{
-    io,
-    path::Path,
-};
+use std::{io, path::Path};
 use walkdir::WalkDir;
 
 pub fn open(path: &Path) -> Result<Connection> {
@@ -72,9 +69,7 @@ pub fn crawl(conn: &Connection, root: &Path, min_size: Option<u64>) -> Result<us
 
 pub fn query_report(conn: &Connection, top: usize) -> Result<()> {
     println!("=== Top {top} Largest Files ===");
-    let mut stmt = conn.prepare(
-        "SELECT path, size FROM files ORDER BY size DESC LIMIT ?1",
-    )?;
+    let mut stmt = conn.prepare("SELECT path, size FROM files ORDER BY size DESC LIMIT ?1")?;
     let rows = stmt.query_map(params![top as i64], |row| {
         Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?))
     })?;
@@ -118,8 +113,9 @@ pub fn query_report(conn: &Connection, top: usize) -> Result<()> {
 }
 
 pub fn export_csv(conn: &Connection, output: Option<&Path>) -> anyhow::Result<()> {
-    let mut stmt =
-        conn.prepare("SELECT path, size, COALESCE(extension,''), modified_at FROM files ORDER BY path")?;
+    let mut stmt = conn.prepare(
+        "SELECT path, size, COALESCE(extension,''), modified_at FROM files ORDER BY path",
+    )?;
 
     let write: Box<dyn io::Write> = match output {
         Some(p) => Box::new(std::fs::File::create(p)?),
@@ -236,12 +232,13 @@ pub fn dump(conn: &Connection, output: Option<&Path>) -> anyhow::Result<()> {
 }
 
 pub fn summary(conn: &Connection) -> Result<()> {
-    let total_files: i64 =
-        conn.query_row("SELECT COUNT(*) FROM files", [], |r| r.get(0))?;
+    let total_files: i64 = conn.query_row("SELECT COUNT(*) FROM files", [], |r| r.get(0))?;
     let total_size: i64 =
         conn.query_row("SELECT COALESCE(SUM(size),0) FROM files", [], |r| r.get(0))?;
     let distinct_ext: i64 =
-        conn.query_row("SELECT COUNT(DISTINCT extension) FROM files", [], |r| r.get(0))?;
+        conn.query_row("SELECT COUNT(DISTINCT extension) FROM files", [], |r| {
+            r.get(0)
+        })?;
 
     println!("Files indexed : {total_files}");
     println!("Total size    : {total_size} bytes");

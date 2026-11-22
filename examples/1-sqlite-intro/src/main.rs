@@ -12,11 +12,7 @@ fn main() -> Result<()> {
     println!("Opened database successfully.");
 
     // SQLite stores the schema version in a pragma — a quick sanity check
-    let version: String = conn.query_row(
-        "SELECT sqlite_version()",
-        [],
-        |row| row.get(0),
-    )?;
+    let version: String = conn.query_row("SELECT sqlite_version()", [], |row| row.get(0))?;
     println!("SQLite version: {version}");
 
     // Connection is closed automatically when `conn` is dropped
