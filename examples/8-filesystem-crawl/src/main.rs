@@ -1,9 +1,9 @@
 // Lesson 3.2 — Crawling the filesystem and persisting metadata
 // Demonstrates: walkdir, reading file metadata, bulk upsert into SQLite.
 
-use rusqlite::{Connection, Result, params};
-use walkdir::WalkDir;
+use rusqlite::{params, Connection, Result};
 use std::path::Path;
+use walkdir::WalkDir;
 
 fn create_schema(conn: &Connection) -> Result<()> {
     conn.execute_batch(
@@ -33,13 +33,11 @@ fn crawl(conn: &Connection, root: &Path) -> Result<usize> {
             .path()
             .extension()
             .map(|e| e.to_string_lossy().to_string());
-        let modified_at = meta
-            .and_then(|m| m.modified().ok())
-            .and_then(|t| {
-                t.duration_since(std::time::UNIX_EPOCH)
-                    .ok()
-                    .map(|d| d.as_secs().to_string())
-            });
+        let modified_at = meta.and_then(|m| m.modified().ok()).and_then(|t| {
+            t.duration_since(std::time::UNIX_EPOCH)
+                .ok()
+                .map(|d| d.as_secs().to_string())
+        });
 
         // UPSERT: update size/modified if the file changed
         tx.execute(
@@ -74,7 +72,11 @@ fn main() -> Result<()> {
          FROM files GROUP BY extension ORDER BY COUNT(*) DESC LIMIT 10",
     )?;
     let rows = stmt.query_map([], |row| {
-        Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?, row.get::<_, i64>(2)?))
+        Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, i64>(1)?,
+            row.get::<_, i64>(2)?,
+        ))
     })?;
 
     println!("\nTop extensions:");

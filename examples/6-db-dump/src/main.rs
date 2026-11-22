@@ -1,7 +1,7 @@
 // Lesson 2.3 — Dumping and migrating databases
 // Demonstrates: generating a SQL dump and schema migrations (ALTER TABLE).
 
-use rusqlite::{Connection, Result, params};
+use rusqlite::{params, Connection, Result};
 
 /// Produce a minimal SQL dump: schema + INSERT statements.
 fn dump_database(conn: &Connection) -> Result<String> {
@@ -70,8 +70,14 @@ fn main() -> Result<()> {
     conn.execute_batch(
         "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT);",
     )?;
-    conn.execute("INSERT INTO users (name, email) VALUES (?1, ?2)", params!["Alice", "alice@example.com"])?;
-    conn.execute("INSERT INTO users (name, email) VALUES (?1, ?2)", params!["Bob", "bob@example.com"])?;
+    conn.execute(
+        "INSERT INTO users (name, email) VALUES (?1, ?2)",
+        params!["Alice", "alice@example.com"],
+    )?;
+    conn.execute(
+        "INSERT INTO users (name, email) VALUES (?1, ?2)",
+        params!["Bob", "bob@example.com"],
+    )?;
 
     let dump = dump_database(&conn)?;
     println!("=== SQL Dump ===\n{dump}");
